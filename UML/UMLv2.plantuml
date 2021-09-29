@@ -1,0 +1,167 @@
+@startuml
+hide circle
+skinparam linetype polyline
+
+note as N1
+    All attributs are not null.
+end note
+
+package Compte{
+    class Compte_Abstrait <<abstract>>{
+      # nom : string
+      # id : unisgned int
+      +getNom() const : string
+      +getSolde() const : int
+      +getNumero() : int
+      +getId() : unsigned int
+      + getArborescence(int h) const: string
+      + getSolde() const : int
+
+    }
+
+
+    class Actif_Abstrait <<abstract>>{
+
+    }
+
+    class Actif{
+
+    }
+
+    class Actif_virtuel{
+      - liste_compte : vector<Actif_Abstrait*>
+      + Add(Actif * compte) : void
+      + Add(Actif_virtuel* compte) : Actif_virtuel&
+    }
+
+
+    class Passif_Abstrait <<aAbstraitbstract>>{
+
+    }
+
+    class Passif{
+
+    }
+
+    class Passif_virtuel{
+      - liste_compte : vector<Passif_Abstrait*>
+      + Add(Passif * compte) : void
+      + Add(Passif_virtuel* compte) : Passif_virtuel&
+    }
+
+    class Depense_Abstrait <<abstract>>{
+
+    }
+
+    class Depense{
+
+    }
+
+    class Depense_virtuel{
+      - liste_compte : vector<Passif_Abstrait*>
+      + Add(Passif * compte) : void
+      + Add(Passif_virtuel* compte) : Passif_virtuel&
+    }
+
+    class Recette_Abstrait <<abstract>>{
+
+    }
+
+    class Recette_virtuel{
+      - liste_compte : vector<Recette_Abstrait*>
+      + Add(Recette * compte) : void
+      + Add(Recette_virtuel* compte) : Recette_virtuel&
+    }
+
+    class Recette{
+
+    }
+
+    class Compte_virtuel{
+      + getArborescence(int h) const: string
+      + getSolde() const : int
+      + getCompte(unisgned int id) : Compte* Abstrait
+    }
+
+    class Compte_Concret{
+      - int solde
+      + getArborescence(int h) const: string
+      + getSolde() const : int
+    }
+
+     Compte_virtuel --|> Compte_Abstrait
+    Compte_Abstrait <|-- Compte_Concret
+
+    Compte_Abstrait <|-- Actif_Abstrait
+    Compte_Abstrait <|-- Passif_Abstrait
+    Compte_Abstrait <|-- Depense_Abstrait
+    Compte_Abstrait <|-- Recette_Abstrait
+
+    Actif_Abstrait <|-- Actif
+    Actif_Abstrait <|-- Actif_virtuel
+
+    Passif_Abstrait <|-- Passif
+    Passif_Abstrait <|-- Passif_virtuel
+
+    Recette_Abstrait <|-- Recette
+    Recette_Abstrait <|-- Recette_virtuel
+
+    Depense_Abstrait <|-- Depense
+    Depense_Abstrait <|-- Depense_virtuel
+
+    Actif_Abstrait *-- Actif_virtuel
+    Passif_Abstrait *-- Passif_virtuel
+    Recette_Abstrait *-- Recette_virtuel
+    Depense_Abstrait *-- Depense_virtuel
+
+
+    Compte_virtuel <|-- Actif_virtuel
+    Compte_virtuel <|-- Passif_virtuel
+    Compte_virtuel <|-- Depense_virtuel
+    Compte_virtuel <|-- Recette_virtuel
+
+
+    Compte_Concret <|-- Actif
+    Compte_Concret <|-- Passif
+    Compte_Concret <|-- Depense
+    Compte_Concret <|-- Recette
+
+}
+
+class Compte_Racine {
+  +methode_cloture()
+  +methode_solde()
+  +methode_bilan()
+  +methode_recette()
+  +methode_depense()
+  +methode_solde()
+}
+
+'Compte_Racine "0..1" -- "1" Actif_Abstrait
+'Compte_Racine "0..1" -- "1" Depense_Abstrait
+'Compte_Racine "0..1" -- "1" Recette_Abstrait
+'Compte_Racine "0..1" -- "1" Passif_Abstrait
+
+
+package gestion_Transaction{
+
+  class Triplet{
+    Debit[0..1] : float
+    Credit[0..1] : float
+    +equilibrage()
+  }
+
+  class Transaction{
+    Date : date
+    Reference : varchar[2]
+    Titre : varchar
+    Rapprochement : boolean
+    +methode_rapprochement()
+    +verif_equilibrage()
+  }
+
+  Triplet "1" -- "1..*" Triplet
+  (Triplet, Triplet) . Transaction
+}
+
+@enduml

@@ -1,0 +1,194 @@
+@startuml
+hide circle
+skinparam linetype polyline
+
+note as N1
+    All attributs are not null.
+end note
+
+package Factory{
+  class factory_Compte{
+    +Fabrication(Type, string, int pere)
+    +Fabrication(Type, string, int pere, int solde)
+    +FabricationLoad(Type, string, int pere, int id)
+    +FabricationLoad(Type, string, int pere, int id, int solde)
+  }
+}
+
+package Compte{
+
+    class enumeration_type_Compte{
+      Passif, Actif, Depense, Recette
+    }
+
+    class Compte_Abstrait <<abstract>>{
+      #nom : string
+      #id : unisgned int
+      #{static}numero : unsigned int
+      #type : enumeration_type_Compte
+      #filename : QString
+      +getNom() const : string
+      +{abstract}getSolde() const : int
+      +{abstract}getSoldeDernierRapprochement() const : int
+      +getNumero() : int
+      +getId() : unsigned int
+      +afficherType() const : string
+      +getType() const : Type
+      +{abstract}getArborescence(int) const : string
+      +{abstract}getArborescenceBilan(int) const : string 
+      +{abstract}getCompte(int) : Compte_Abstrait*
+      +{abstract}getCompte(const string&) : Compte_Abstrait*
+      +getFilename() const : QString
+      +{abstract}isVirtuel() const : bool
+      +{abstract}getSoldeBilan() const: int
+      +{abstract}setSoldeBilan() 
+      +{abstract}save(ofstream&, int) const
+    }
+
+    class Compte_Concret{
+      -soldeReel : int
+      -soldeRapprochement : int
+      -soldeBilan : int
+      +getCompte(const string&): Compte_Abstrait*
+      +getCompte(int) : Compte_Abstrait*
+      +getArborescence(int) const: string
+      +getArborescenceBilan(int) const : string
+      +getSolde() const : int
+      +modifSolde(int)
+      +getSoldeDernierRapprochement() const: int
+      +modifSoldeDernierRapprochement() 
+      +getSoldeBilan() const : int
+      +modifSoldeBilan(int)
+      +setSoldeBilan()
+      +isVirtuel() : bool
+      +save(ofstream&, int) const
+    }
+
+    class Compte_virtuel{
+      #liste_compte : vector<Compte_Abstrait*>
+      #soldeBilan : int
+      +getArboresence(int) const : string
+      +getArborescenceBilan(int) const : string
+      +getSolde() const : int
+      +getSoldeDernierRapprochement() const : int
+      +getSoldeBilan() const : int
+      +getCompte(const string&) : Compte_Abstrait*
+      +getCompte(int) : Compte_Abstrait*
+      +Add(Compte_Concret*) : void
+      +Add(Compte_virtuel*) : Compte_virtuel&
+      +supprimerElement(int) : bool
+      +getIdPere(int) : int
+      +isVirtuel() const : bool
+      +isEmpty() const : bool
+      +getFirstCompte() const: vector<Compte_Abstrait*>::const_iterator 
+      +getLastCompte() const: vector<Compte_Abstrait*>::const_iterator
+      +getListeCompte() const: vector<Compte_Abstrait*>
+      +save(ofstream&, int) const
+      +getBilan(Date) : int
+      +setSoldeBilan()
+    }
+    
+    class Singleton{
+      -{static}compteRacine : Singleton*
+      +{static}donneInstance() : Singleton&
+      +{static}libereInstance()
+      +deplacer(int compte, int ancien, int pere) : bool
+      +suppression(int pere, int compte) : bool
+      +setFilename(const QString&)
+      +resultat() : int
+      +load(const QString&)
+      +save(ofstream&, int) const
+    }
+    
+
+    Compte_Abstrait <|-- Compte_Concret
+    Compte_Abstrait <|-- Compte_virtuel
+    Compte_virtuel <|-- Singleton
+
+    Compte_virtuel *--"0..*" Compte_Abstrait
+
+}
+
+package gestion_Transaction{
+   
+   class TransactionManager{
+    HANDLER
+    friend Compte_Concret
+    -transactions : vector<Transaction*>
+    -filename : QString
+    -{static}handler : Handler
+    +{static}getManager() : TransactionManager&
+    +{static}libererManager()
+    +getFilename() : QString
+    +setFilename(const QString&)
+    +getTransaction(const string&) : Transaction&
+    +ajouterTransaction(Transaction&)
+    +creerTransaction(Date, const string& ref, const string& tri, vector<Triplet*>) : bool
+    +supprimerTransaction(const string& ref) : bool
+    +modifierTransaction(const string& ref, Date newDate, const string& newTitre, vector<Triplet*> newvec) : bool
+    +getIteratorTransaction() const : vector<Transaction*>::const_iterator
+    +getEndIteratorTransaction() const : vector<Transaction*>::const_iterator
+    +voirRapprochement(Date, int, int) : string
+    +validerRapprochement(Date, int) 
+    +cloture(string, Date)
+    +releve(Date deb, Date fin) : string
+    +save() const
+    +load(const QString&)
+    
+    FilterIterator
+    FilterIteratorRapproche
+    
+    +getFilterIterator(const Compte_Concret&) const : FilterIterator
+    +getFilterIteratorRapproche(Compte_Concret&) const : FilterIteratorRapproche
+  }
+  
+   class Triplet{
+    -compte : Compte_Concret*
+    debit : int
+    credit : int
+    +getType() const : Type
+    +getNom() const : string
+    +getDebit() const : int
+    +getCredit() const : int
+    +getCompte() : Compte_Concret*
+  }
+  
+    Triplet "1" -- "1..*" Triplet
+    
+    
+     class Transaction{
+    friend TransactionManager
+    -Date : date
+    -refe : string
+    -titre : string
+    -listeTriplet : vector<Triplet*>
+    -rapproche : bool
+    +getDate() const : Date
+    +getTitre() const : string
+    +getRef() const : string
+    +getTriplet() const : vector<Triplet*>::const_iterator
+    +getEndTriplet() const : vector<Triplet*>::const_iterator
+    +setRapproche()
+    +getRapproche() const : bool
+    +isInside(const Compte_Concret&) : bool
+  }
+  
+  TransactionManager o-- "0..*" Transaction
+  (Triplet, Triplet) .. Transaction
+}
+Triplet "0..*" -- "1" Compte_Concret
+
+package Date{
+
+    class Date{
+        -jour : int
+        -mois : int
+        -annee : int
+        +getJour() const: int
+        +getMois() const : int
+        +getannee() const : int 
+    }
+}
+
+@enduml
+

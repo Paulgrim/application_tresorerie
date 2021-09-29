@@ -1,0 +1,74 @@
+@startuml
+hide circle
+skinparam linetype polyline
+
+note as N1
+    All attributs are not null.
+end note
+
+package Compte{
+
+    class enumeration_type_Compte{
+      Passif, Actif, Depense, Recette
+    }
+
+    class Compte_Abstrait <<abstract>>{
+      # nom : string
+      # id : unisgned int
+      type : enumeration_type_Compte
+      +getNom() const : string
+      +getSolde() const : int
+      +getNumero() : int
+      +getId() : unsigned int
+      + getArborescence(int h) const: string
+      + getSolde() const : int
+
+    }
+
+    class Compte_Concret{
+
+    }
+
+    class Compte_virtuel{
+      - liste_compte : vector<Compte_Abstrait*>
+      + Add(Compte_Concret * compte) : void
+      + Add(Compte_virtuel* compte) : Compte_virtuel&
+    }
+
+
+    Compte_Abstrait <|-- Compte_Concret
+    Compte_Abstrait <|-- Compte_virtuel
+
+    Compte_Abstrait *-- Compte_virtuel
+
+}
+
+package gestion_Transaction{
+
+  class Triplet{
+    Debit[0..1] : float
+    Credit[0..1] : float
+    +equilibrage()
+  }
+
+  class Transaction{
+    Date : date
+    Reference : varchar[2]
+    Titre : varchar
+    Rapprochement : boolean
+    +methode_rapprochement()
+    +verif_equilibrage()
+  }
+
+  Triplet "1" -- "1..*" Triplet
+  (Triplet, Triplet) . Transaction
+}
+Triplet "0..*" -- "1" Compte_Concret
+
+package Factory{
+  class factory_Compte{
+    + Fabrication()
+  }
+}
+
+@enduml

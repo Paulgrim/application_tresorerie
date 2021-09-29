@@ -1,0 +1,107 @@
+@startuml
+hide circle
+
+
+note as N1
+    All attributs are not null.
+end note
+
+package Compte_virtuelle{
+
+    class Compte_virtuelle << abstract >> {
+    +methode_solde()
+    }
+
+    class Actif_virtuelle{
+
+    }
+
+    class Passif_virtuelle{
+
+    }
+
+    class Depense_virtuelle{
+
+    }
+
+    Compte_virtuelle <|-- Actif_virtuelle
+    Compte_virtuelle <|-- Passif_virtuelle
+    Compte_virtuelle <|-- Depense_virtuelle
+    Compte_virtuelle <|-- Recette_virtuelle
+}
+
+package Compte{
+  class Compte <<abstract>>{
+    Nom : varchar
+    solde : float
+    +get_solde()
+  }
+
+  class Recette{
+
+  }
+
+  class Actif{
+
+  }
+
+  class Passif{
+
+  }
+
+  class Depense{
+
+  }
+
+Compte <|-- Recette
+Compte <|-- Actif
+Compte <|-- Depense
+Compte <|-- Passif
+}
+
+class Compte_Racine{
+  +methode_cloture()
+  +methode_solde()
+  +methode_bilan()
+  +methode_recette()
+  +methode_depense()
+  +methode_solde()
+}
+
+Actif_virtuelle *-- "0..*" Actif
+Depense_virtuelle *-- "0..*" Depense
+Recette_virtuelle *-- "0..*" Recette
+Passif_virtuelle *-- "0..*" Passif
+
+Actif_virtuelle "0..1" -- "0..*" Actif_virtuelle : contient
+Depense_virtuelle "0..1" -- "0..*" Depense_virtuelle : contient
+Recette_virtuelle "0..1" -- "0..*" Recette_virtuelle : contient
+Passif_virtuelle "0..1" -- "0..*" Passif_virtuelle : contient
+
+Compte_Racine "0..1" -- "1" Actif_virtuelle
+Compte_Racine "0..1" -- "1" Depense_virtuelle
+Compte_Racine "0..1" -- "1" Recette_virtuelle
+Compte_Racine "0..1" -- "1" Passif_virtuelle
+
+package gestion_Transaction{
+
+  class Triplet{
+    Debit[0..1] : float
+    Credit[0..1] : float
+    +equilibrage()
+  }
+
+  class Transaction{
+    Date : date
+    Reference : varchar[2]
+    Titre : varchar
+    Rapprochement : boolean
+    +methode_rapprochement()
+    +verif_equilibrage()
+  }
+
+  Triplet "1" -- "1..*" Triplet
+  (Triplet, Triplet) . Transaction
+}
+Triplet "0..*" -- "1" Compte
+@enduml
